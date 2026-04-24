@@ -1,6 +1,8 @@
-﻿using ClinicaDocMais.Models;
+﻿using ClinicaDocMais.Data;
+using ClinicaDocMais.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Runtime.CompilerServices;
 
 namespace clinicaDocMais.Controllers
@@ -9,13 +11,30 @@ namespace clinicaDocMais.Controllers
     [ApiController]
     public class MedicoController : ControllerBase
     {
+
         public static List<MedicoModel> listaMedicos = new List<MedicoModel>();
 
-        [HttpPost("cadastroMedico")]
-        public string cadastroMedico([FromBody] MedicoModel medico)
+        private readonly ClinicaContext _context;
+
+        public MedicoController(ClinicaContext context)
         {
-            listaMedicos.Add(medico);
-            return $"Dr. {medico.nome} cadastrado com sucesso";
+            _context = context;
+        }
+        
+
+        [HttpPost("cadastroMedico")]
+        public async Task<IActionResult> CadastrarPaciente([FromBody] MedicoModel medicoCadastrado)
+        {
+            try
+            {
+                _context.Add(medicoCadastrado);
+                await _context.SaveChangesAsync();
+                return Created();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Erro Inesperado: " + ex.Message);
+            }
         }
         [HttpGet("listaMedicos")]
         public List<MedicoModel> listarMedicos()
@@ -23,17 +42,27 @@ namespace clinicaDocMais.Controllers
             return listaMedicos;
         }
         [HttpDelete("deletarMedico/{crm}")]
-        public string deletarPaciente(string crm)
+        public async Task<IActionResult> deletarMedico(string crm)
         {
-            foreach (var medico in listaMedicos)
+            try
             {
-                if (medico.crm == crm)
+                MedicoModel? medicoEncontrado = await _context.Medicos.FindAsync(crm);
+                if (medicoEncontrado == null)
                 {
-                    listaMedicos.Remove(medico);
-                    return $"Medico com crm: {crm} deletado com sucesso";
+                    _context.Medicos.Remove(medicoEncontrado);
+                    await _context.SaveChangesAsync();
+                    return NoContent();
+
+                }
+                else
+                {
+                    throw new Exception($"Paciente de CPF{crm} não existe");
                 }
             }
-            return "Medico não encontrado";
+            catch (Exception ex)
+            {
+                return BadRequest("Erro. " + ex.Message);
+            }
         }
     }
 }

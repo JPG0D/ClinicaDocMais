@@ -20,11 +20,11 @@ namespace ClinicaDocMais.Controllers
             {
                 AgendamentoModel agendamento = new AgendamentoModel();
                 agendamento.nomePaciente = dadosAgendamento.paciente?.nome;
-                agendamento.telefonePaciente = dadosAgendamento.paciente.telefone;
-                agendamento.cpfPaciente = dadosAgendamento.paciente.cpf;
+                agendamento.telefonePaciente = dadosAgendamento.paciente?.telefone;
+                agendamento.cpfPaciente = dadosAgendamento.paciente?.cpf;
                 agendamento.nomeMedico = dadosAgendamento.medico?.nome;
-                agendamento.crmMedico = dadosAgendamento.medico.crm;
-                agendamento.especialidadeMedico = dadosAgendamento.medico.especialidade;
+                agendamento.crmMedico = dadosAgendamento.medico?.crm;
+                agendamento.especialidadeMedico = dadosAgendamento.medico?.especialidade;
                 agendamento.dataHoraAgendamento = dadosAgendamento.dataHoraAgendada;
 
                 listaDeAgendamentos.Add(agendamento);
