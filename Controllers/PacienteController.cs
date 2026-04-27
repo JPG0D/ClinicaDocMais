@@ -2,6 +2,7 @@
 using ClinicaDocMais.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ClinicaDocMais.Controllers
 {
@@ -36,22 +37,31 @@ namespace ClinicaDocMais.Controllers
         }
 
         [HttpGet("listarpacientes")]
-        public List<PacienteModel> listarPaciente()
-        {
-            return listaPaciente;
-        }
-
-        [HttpGet("buscaPaciente/{id}")]
-        public async Task<IActionResult> buscarPaciente(string cpf)
+        public async Task<IActionResult> listarPaciente()
         {
             try
             {
-                PacienteModel? pacienteEncontrado = await _context.Pacientes.FindAsync(cpf);
-                return Ok(pacienteEncontrado);
+                var listaPaciente = await _context.Pacientes.ToListAsync();
+                return Ok(listaPaciente);
+
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest("Erro. " + ex.Message);
+            }
+        }
+
+        [HttpGet("buscaPaciente/{nome}")]
+        public async Task<IActionResult> buscarPaciente(string nome)
+        {
+            try
+            {
+                var listaBuscaPaciente = await _context.Pacientes.Where(p => p.nome.Contains(nome)).ToListAsync();
+                return Ok(listaBuscaPaciente);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Erro. " + ex.Message); 
             }
         }
 
